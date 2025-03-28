@@ -91,6 +91,10 @@ class AutoController {
     }
   }
 
+  // Asumiendo que tienes un modelo 'Auto' y un archivo de rutas
+
+
+
   async eliminar(req: Request, res: Response) {
     try {
       const auto = await Auto.findByPk(Number(req.params.id));
@@ -139,8 +143,7 @@ class AutoController {
       }
 
       await auto.update({
-        ultimoServicio: new Date(),
-        estado: 'Mantenimiento realizado'
+        ultimoServicio: new Date()
       });
 
       res.json(auto);
@@ -176,6 +179,54 @@ class AutoController {
     } catch (error) {
       logger.error('Error al actualizar imagen:', error);
       res.status(500).json({ error: 'Error al actualizar la imagen del auto' });
+    }
+  }
+
+  async actualizarEstado(req: Request, res: Response) {
+    try {
+      const { estado } = req.body;
+      const auto = await Auto.findByPk(Number(req.params.id));
+      
+      if (!auto) {
+        return res.status(404).json({ error: 'Auto no encontrado' });
+      }
+
+      if (!['disponible', 'mantenimiento', 'vendido'].includes(estado)) {
+        return res.status(400).json({ 
+          error: 'Estado no válido',
+          detalles: 'El estado debe ser: disponible, mantenimiento o vendido'
+        });
+      }
+
+      await auto.update({ estado });
+      res.json(auto);
+    } catch (error) {
+      logger.error('Error al actualizar estado del auto:', error);
+      res.status(500).json({ 
+        error: 'Error al actualizar el estado del auto',
+        detalles: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  }
+
+  async obtenerAutosDisponibles(req: Request, res: Response) {
+    try {
+      const autosDisponibles = await Auto.findAll({
+        where: { estado: 'disponible' },
+        order: [['createdAt', 'DESC']]
+      });
+
+      if (!autosDisponibles || autosDisponibles.length === 0) {
+        return res.status(404).json({ mensaje: 'No hay autos disponibles en este momento' });
+      }
+
+      res.json(autosDisponibles);
+    } catch (error) {
+      logger.error('Error al obtener autos disponibles:', error);
+      res.status(500).json({ 
+        error: 'Error al obtener los autos disponibles',
+        detalles: error instanceof Error ? error.message : 'Error desconocido'
+      });
     }
   }
 }

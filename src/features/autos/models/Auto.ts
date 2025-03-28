@@ -10,10 +10,11 @@ export interface AutoAttributes {
   tipoCarroceria: string;
   color: string;
   placas: string;
-  estado: string;
+  estado: EstadoAuto;
   precio: number;
   descripcion: string;
   imagenUrl?: string;
+  imagenUrlCompleta?: string;
   ultimoServicio?: Date;
   caracteristicas: string[];
 }
@@ -27,7 +28,7 @@ class Auto extends Model<AutoAttributes> implements AutoAttributes {
   public tipoCarroceria!: string;
   public color!: string;
   public placas!: string;
-  public estado!: string;
+  public estado!: EstadoAuto;
   public precio!: number;
   public descripcion!: string;
   public imagenUrl!: string;
@@ -35,10 +36,27 @@ class Auto extends Model<AutoAttributes> implements AutoAttributes {
   public caracteristicas!: string[];
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  private getBaseUrl(): string {
+    return process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+  }
+
+  public get imagenUrlCompleta(): string {
+    return this.imagenUrl ? `${this.getBaseUrl()}/${this.imagenUrl}` : '';
+  }
+
+  public toJSON(): AutoAttributes {
+    const values = super.toJSON() as AutoAttributes;
+    values.imagenUrlCompleta = this.imagenUrlCompleta;
+    return values;
+  }
 }
 
 export const TIPOS_CARROCERIA = ['sedan', 'suv', 'hatchback', 'pickup', 'van', 'coupe', 'wagon', 'convertible', 'truck'] as const;
 export type TipoCarroceria = typeof TIPOS_CARROCERIA[number];
+
+export const ESTADOS_AUTO = ['disponible', 'mantenimiento', 'vendido'] as const;
+export type EstadoAuto = typeof ESTADOS_AUTO[number];
 
 Auto.init(
   {
@@ -77,8 +95,9 @@ Auto.init(
       unique: true,
     },
     estado: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...ESTADOS_AUTO),
       allowNull: false,
+      defaultValue: 'disponible',
     },
     precio: {
       type: DataTypes.DECIMAL(10, 2),

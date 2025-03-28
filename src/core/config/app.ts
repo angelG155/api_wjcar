@@ -7,9 +7,27 @@ import fs from 'fs';
 import logger from '../utils/logger';
 
 export const configureApp = async (app: Application) => {
-  // Middlewares básicos
-  app.use(cors());
-  app.use(helmet());
+  // Configuración de CORS
+  app.use(cors({
+    origin: true, // Permite todas las origenes
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    credentials: true
+  }));
+
+  // Configuración de Helmet con ajustes para recursos estáticos
+  app.use(helmet({
+    crossOriginResourcePolicy: {
+      policy: 'cross-origin'
+    },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'blob:', '*']
+      }
+    }
+  }));
   
   // Morgan solo en desarrollo
   if (process.env.NODE_ENV === 'development') {
@@ -47,18 +65,16 @@ export const configureApp = async (app: Application) => {
   
   // Servir archivos estáticos
   const storagePath = path.join(process.cwd(), 'storage');
-  app.use('/storage', express.static(storagePath));
+  app.use('/storage', express.static(storagePath, {
+    setHeaders: (res) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+    }
+  }));
   
   // Asegurarse de que existe el directorio de storage
   const imageDir = path.join(storagePath, 'images', 'autos');
   if (!fs.existsSync(imageDir)) {
     fs.mkdirSync(imageDir, { recursive: true });
   }
-
-  // Configurar cabeceras CORS específicas si es necesario
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-  });
 }; 
