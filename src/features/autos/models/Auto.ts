@@ -12,6 +12,7 @@ export interface AutoAttributes {
   placas: string;
   estado: string;
   precio: number;
+  descripcion: string;
   imagenUrl?: string;
   ultimoServicio?: Date;
   caracteristicas: string[];
@@ -28,6 +29,7 @@ class Auto extends Model<AutoAttributes> implements AutoAttributes {
   public placas!: string;
   public estado!: string;
   public precio!: number;
+  public descripcion!: string;
   public imagenUrl!: string;
   public ultimoServicio!: Date;
   public caracteristicas!: string[];
@@ -78,6 +80,10 @@ Auto.init(
     },
     precio: {
       type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
+    descripcion: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     imagenUrl: {

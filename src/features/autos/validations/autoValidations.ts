@@ -12,6 +12,7 @@ const autoValidationSchema = Joi.object({
   placas: Joi.string().required(),
   estado: Joi.string().required(),
   precio: Joi.number().required(),
+  descripcion: Joi.string().required().min(10).max(500),
   imagenUrl: Joi.string().allow(null, ''),
   ultimoServicio: Joi.date().allow(null),
   caracteristicas: Joi.array().items(Joi.string()).required()

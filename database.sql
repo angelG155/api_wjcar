@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS autos (
     placas VARCHAR(255) NOT NULL UNIQUE,
     estado VARCHAR(255) NOT NULL,
     precio DECIMAL(10,2) NOT NULL,
+    descripcion TEXT NOT NULL,
     imagenUrl VARCHAR(255) DEFAULT 'storage/images/autos/default-car.jpg',
     ultimoServicio DATETIME,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -55,6 +56,6 @@ INSERT INTO marcas (nombre, descripcion, paisOrigen) VALUES
     ('Ford', 'Fabricante estadounidense de automóviles con una rica historia', 'Estados Unidos');
 
 -- Insertar algunos autos de ejemplo
-INSERT INTO autos (nombre, marca, modelo, anio, color, placas, estado, precio, imagenUrl) VALUES
-    ('Corolla Sedan', 'Toyota', 'Corolla', 2020, 'Blanco', 'ABC123', 'Disponible', 25000.00, NULL),
-    ('Civic Sport', 'Honda', 'Civic', 2021, 'Negro', 'XYZ789', 'Mantenimiento', 28000.00, NULL); 
+INSERT INTO autos (nombre, marca, modelo, anio, color, placas, estado, precio, descripcion, imagenUrl) VALUES
+    ('Corolla Sedan', 'Toyota', 'Corolla', 2020, 'Blanco', 'ABC123', 'Disponible', 25000.00, 'Sedán familiar con excelente rendimiento de combustible y características de seguridad avanzadas', NULL),
+    ('Civic Sport', 'Honda', 'Civic', 2021, 'Negro', 'XYZ789', 'Mantenimiento', 28000.00, 'Versión deportiva del Civic con motor turbo y acabados deportivos premium', NULL); 
