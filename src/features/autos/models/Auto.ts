@@ -36,7 +36,9 @@ class Auto extends Model<AutoAttributes> implements AutoAttributes {
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
-const TIPOS_CARROCERIA = ['sedan', 'suv', 'hatchback', 'pickup', 'van', 'coupe', 'wagon', 'convertible', 'truck'];
+
+export const TIPOS_CARROCERIA = ['sedan', 'suv', 'hatchback', 'pickup', 'van', 'coupe', 'wagon', 'convertible', 'truck'] as const;
+export type TipoCarroceria = typeof TIPOS_CARROCERIA[number];
 
 Auto.init(
   {
@@ -107,11 +109,10 @@ Auto.init(
         }
       }
     }
-    
   },
   {
     sequelize,
-    modelName: 'Auto',
+    modelName: 'Auto'
   }
 );
 

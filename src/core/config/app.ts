@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
 import fs from 'fs';
+import logger from '../utils/logger';
 
 export const configureApp = async (app: Application) => {
   // Middlewares básicos
@@ -45,5 +46,19 @@ export const configureApp = async (app: Application) => {
   });
   
   // Servir archivos estáticos
-  app.use('/storage', express.static(path.join(__dirname, '../../../storage')));
+  const storagePath = path.join(process.cwd(), 'storage');
+  app.use('/storage', express.static(storagePath));
+  
+  // Asegurarse de que existe el directorio de storage
+  const imageDir = path.join(storagePath, 'images', 'autos');
+  if (!fs.existsSync(imageDir)) {
+    fs.mkdirSync(imageDir, { recursive: true });
+  }
+
+  // Configurar cabeceras CORS específicas si es necesario
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  });
 }; 

@@ -13,6 +13,12 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT || 3000;
 
+  // Configurar la URL base si no está definida
+  if (!process.env.BASE_URL) {
+    process.env.BASE_URL = `http://localhost:${PORT}`;
+    logger.info(`URL base configurada como: ${process.env.BASE_URL}`);
+  }
+
   // Configurar la aplicación
   await configureApp(app);
 
@@ -40,6 +46,7 @@ async function startServer() {
     // Iniciar el servidor
     app.listen(PORT, () => {
       logger.info(`Servidor corriendo en el puerto ${PORT}`);
+      logger.info(`URL base: ${process.env.BASE_URL}`);
     });
   } catch (error) {
     logger.error('Error al iniciar el servidor:', error);
