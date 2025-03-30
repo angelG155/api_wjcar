@@ -17,6 +17,7 @@ export interface AutoAttributes {
   imagenUrlCompleta?: string;
   ultimoServicio?: Date;
   caracteristicas: string[];
+  top_sales: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -36,6 +37,7 @@ class Auto extends Model<AutoAttributes> implements AutoAttributes {
   public imagenUrl!: string;
   public ultimoServicio!: Date;
   public caracteristicas!: string[];
+  public top_sales!: boolean;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
@@ -77,6 +79,7 @@ class Auto extends Model<AutoAttributes> implements AutoAttributes {
       imagenUrlCompleta: values.imagenUrlCompleta,
       ultimoServicio: values.ultimoServicio,
       caracteristicas: values.caracteristicas,
+      top_sales: values.top_sales,
       createdAt: values.createdAt,
       updatedAt: values.updatedAt
     };
@@ -182,6 +185,11 @@ Auto.init(
           }
         }
       }
+    },
+    top_sales: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     }
   },
   {

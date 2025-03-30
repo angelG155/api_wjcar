@@ -213,7 +213,10 @@ class AutoController {
     try {
       const autosDisponibles = await Auto.findAll({
         where: { estado: 'disponible' },
-        order: [['createdAt', 'DESC']]
+        order: [
+          ['top_sales', 'DESC'],
+          ['createdAt', 'DESC']
+        ]
       });
 
       if (!autosDisponibles || autosDisponibles.length === 0) {
@@ -225,6 +228,33 @@ class AutoController {
       logger.error('Error al obtener autos disponibles:', error);
       res.status(500).json({ 
         error: 'Error al obtener los autos disponibles',
+        detalles: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+  }
+
+  async actualizarTopSales(req: Request, res: Response) {
+    try {
+      const { top_sales } = req.body;
+      const auto = await Auto.findByPk(Number(req.params.id));
+      
+      if (!auto) {
+        return res.status(404).json({ error: 'Auto no encontrado' });
+      }
+
+      if (typeof top_sales !== 'boolean') {
+        return res.status(400).json({ 
+          error: 'Valor no válido',
+          detalles: 'El campo top_sales debe ser un valor booleano (true/false)'
+        });
+      }
+
+      await auto.update({ top_sales });
+      res.json(auto);
+    } catch (error) {
+      logger.error('Error al actualizar top_sales del auto:', error);
+      res.status(500).json({ 
+        error: 'Error al actualizar top_sales del auto',
         detalles: error instanceof Error ? error.message : 'Error desconocido'
       });
     }

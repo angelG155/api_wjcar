@@ -35,4 +35,7 @@ router.patch('/:id/imagen', validarId, upload.single('imagen'), autoController.a
 // Actualizar estado del auto
 router.patch('/:id/estado', validarId, autoController.actualizarEstado);
 
+// Actualizar top_sales del auto
+router.patch('/:id/top-sales', validarId, autoController.actualizarTopSales);
+
 export default router; 
