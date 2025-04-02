@@ -18,6 +18,7 @@ export interface AutoAttributes {
   ultimoServicio?: Date;
   caracteristicas: string[];
   top_sales: boolean;
+  millas: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -38,6 +39,7 @@ class Auto extends Model<AutoAttributes> implements AutoAttributes {
   public ultimoServicio!: Date;
   public caracteristicas!: string[];
   public top_sales!: boolean;
+  public millas!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
@@ -80,6 +82,7 @@ class Auto extends Model<AutoAttributes> implements AutoAttributes {
       ultimoServicio: values.ultimoServicio,
       caracteristicas: values.caracteristicas,
       top_sales: values.top_sales,
+      millas: values.millas,
       createdAt: values.createdAt,
       updatedAt: values.updatedAt
     };
@@ -190,6 +193,11 @@ Auto.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    millas: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     }
   },
   {
