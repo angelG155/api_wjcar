@@ -4,77 +4,97 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
 import fs from 'fs';
-import logger from '../utils/logger';
+import rateLimit from 'express-rate-limit';
+import compression from 'compression';
+import config from './environments';
+import logger from '../../utils/logger';
 
 export const configureApp = async (app: Application) => {
-  // Configuración de CORS
-  app.use(cors({
-    origin: true, // Permite todas las origenes
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Range', 'X-Content-Range'],
-    credentials: true
-  }));
-
-  // Configuración de Helmet con ajustes para recursos estáticos
+  // Configuración de seguridad con Helmet
   app.use(helmet({
-    crossOriginResourcePolicy: {
-      policy: 'cross-origin'
-    },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'blob:', '*']
-      }
+        imgSrc: ["'self'", 'data:', 'blob:', '*'],
+        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+      },
+    },
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
+
+  // Configuración de CORS
+  app.use(cors({
+    origin: config.cors.origin,
+    methods: config.cors.methods,
+    credentials: true,
+    maxAge: 86400 // 24 horas
+  }));
+
+  // Límite de tasa de peticiones
+  /* app.use(rateLimit({
+    windowMs: config.rateLimit.windowMs,
+    max: config.rateLimit.max,
+    message: { error: 'Demasiadas peticiones, por favor intente más tarde' }
+  })); */
+
+  // Compresión de respuestas
+  app.use(compression({
+    level: Number(process.env.COMPRESSION_LEVEL) || 6,
+    filter: (req, res) => {
+      if (req.headers['x-no-compression']) return false;
+      return compression.filter(req, res);
     }
   }));
-  
-  // Morgan solo en desarrollo
-  if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
-  }
-  
-  // Configurar express para manejar caracteres especiales
-  app.use(express.json());
+
+  // Configuración de body parser
+  app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ 
     extended: true,
-    limit: '50mb',
-    parameterLimit: 100000,
-    verify: (req, res, buf) => {
-      try {
-        JSON.parse(buf.toString());
-      } catch (e) {
-        // Si no es JSON válido, no hay problema
-      }
-    }
+    limit: '10mb'
   }));
-  
-  // Crear y configurar directorios de storage
-  const storageDirs = [
-    'storage/images/autos',
-    'storage/images/thumbnails',
-    'storage/temp'
+
+  // Logging con Morgan
+  if (process.env.NODE_ENV === 'production') {
+    const accessLogStream = fs.createWriteStream(
+      path.join(process.cwd(), 'logs', 'access.log'),
+      { flags: 'a' }
+    );
+    app.use(morgan('combined', { stream: accessLogStream }));
+  } else {
+    app.use(morgan('dev'));
+  }
+
+  // Crear directorios necesarios
+  const dirs = [
+    path.join(process.cwd(), 'logs'),
+    path.join(process.cwd(), config.storage.uploadDir)
   ];
 
-  storageDirs.forEach(dir => {
-    const fullPath = path.join(__dirname, '../../../', dir);
-    if (!fs.existsSync(fullPath)) {
-      fs.mkdirSync(fullPath, { recursive: true });
+  dirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
     }
   });
-  
-  // Servir archivos estáticos
-  const storagePath = path.join(process.cwd(), 'storage');
-  app.use('/storage', express.static(storagePath, {
+
+  // Servir archivos estáticos con cache
+  app.use(config.storage.publicUrl, express.static(config.storage.basePath, {
+    maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
     setHeaders: (res) => {
       res.set('Access-Control-Allow-Origin', '*');
       res.set('Cross-Origin-Resource-Policy', 'cross-origin');
     }
   }));
+
+ 
+  // Middleware de seguridad adicional
+  app.use((req, res, next) => {
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('X-Frame-Options', 'DENY');
+    res.set('X-XSS-Protection', '1; mode=block');
+    next();
+  });
+
   
-  // Asegurarse de que existe el directorio de storage
-  const imageDir = path.join(storagePath, 'images', 'autos');
-  if (!fs.existsSync(imageDir)) {
-    fs.mkdirSync(imageDir, { recursive: true });
-  }
+
+  logger.info('Aplicación configurada correctamente');
 }; 

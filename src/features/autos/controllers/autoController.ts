@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { UniqueConstraintError } from 'sequelize';
 import fs from 'fs';
 import path from 'path';
-import logger from '../../../core/utils/logger';
+import logger from '../../../utils/logger';
 import Auto, { AutoAttributes } from '../models/Auto';
 
 class AutoController {

@@ -4,7 +4,7 @@ import { configureApp } from './core/config/app';
 import sequelize from './core/config/database';
 import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
-import logger from './core/utils/logger';
+import logger from './utils/logger';
 
 // Configuración de variables de entorno
 dotenv.config();
@@ -24,6 +24,11 @@ async function startServer() {
 
   // Rutas
   app.use('/api', routes);
+
+  // Error handler para rutas no encontradas
+  app.use((req, res) => {
+    res.status(404).json({ error: 'Ruta no encontrada' });
+  });
 
   // Manejador de errores
   app.use(errorHandler);

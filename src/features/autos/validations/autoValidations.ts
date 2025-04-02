@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
-import logger from '../../../core/utils/logger';
+import logger from '../../../utils/logger';
 
 const autoValidationSchema = Joi.object({
   nombre: Joi.string().required(),

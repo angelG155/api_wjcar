@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import logger from '../core/utils/logger';
+import logger from '../utils/logger';
 
 export const validarId = (req: Request, res: Response, next: NextFunction) => {
   const id = Number(req.params.id);
